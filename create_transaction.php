@@ -18,56 +18,53 @@ $get_client = mysqli_query($conn, "SELECT * FROM clients");
 
 
 
+
+
 //register client 
-if(isset($_POST['save_service'])){
-	$service_name = trim($_POST['service_name']);
-	$service_description = trim($_POST['service_description']);
-	$price = trim($_POST['service_price']);
-
-	if(!empty($service_name) && !empty($service_description) && !empty($price)){
-
-		//check if client exists
-		$check_service_query = mysqli_query($conn, "SELECT service_name FROM services WHERE service_name = '$service_name' ");
-		$result = mysqli_num_rows($check_service_query);
-		if($result == 1 && $result != 0){
-			array_push($errors, "Service already exists");
-      exit();
-		}else{
-			$create_client_query = mysqli_query($conn, "INSERT INTO services (service_name, service_description, service_cost) VALUES ('$service_name', '$service_description', '$price')");
-			if($create_client_query){
-				$_SESSION['success'] = "Service successfully created";
-				$_SESSION['msg_type'] = 'success';	
-				header('location: show_services.php');		
-			}else{
-				array_push($errors, "something went wrong" .$conn-> error);
-        exit();
-			}
-		}
-	}else{
-		array_push($errors, "Service Name/Service Description cannpt be empty");
-    exit();
-	}
-}elseif (isset($_POST['update_service'])) {
-  $id = trim($_POST['id']);
+if(isset($_POST['save_transaction'])){
+  //$id = trim($_POST['id']);
+  $client_name = trim($_POST['client_name']);
   $service_name = trim($_POST['service_name']);
-  $service_description = trim($_POST['service_description']);
-  $price = trim($_POST['service_price']);
+  $free_service = trim($_POST['free_service']);
+  if($free_service == ""):
+    $free_service = 'paid';
+  endif;
+  $serviced_by = trim($_POST['serviced_by']);
 
-  if(!empty($service_name) && !empty($service_description) && !empty($price)){
-
-    $update_service_query = mysqli_query($conn, "UPDATE services SET service_name = '$service_name', service_description = '$service_description', service_cost = '$price' WHERE service_id = '$id' ");
-    if($update_service_query){
-      $_SESSION['success'] = "Service successfully Updated";
-      $_SESSION['msg_type'] = 'success';  
-      header('location: show_services.php');
-    }else{
-      array_push($errors, "something went wrong ".$conn-> error);
-    }
-  }else{
-    array_push($errors, "Service Name/Service Description/Service Price cannot be empty");
+  if(empty($client_name) && empty($service_name) && empty($serviced_by)){
+    array_push($errors, "client name and service name and serviced by can't be empty");
   }
-}
 
+  //check the service count i
+  //if less than five, add service, if not, prompt the free service and clear the service count
+    //insert into service_client
+    $service_client_query = mysqli_query($conn, "INSERT INTO service_client (client_name, service_name, is_free, serviced_by) VALUES ('$client_name', '$service_name', '$free_service', '$serviced_by')");
+    if($service_client_query){
+      //update service count
+      
+      $_SESSION['message'] = "Transaction Successfully added";
+      $_SESSION['msg_type'] = "success";
+    }else{
+      $_SESSION['message'] = "Something went wrong while adding transaction " .$conn-> error;
+      $_SESSION['msg_type'] = "danger";
+      
+    }
+
+  
+  //update service count
+  $num_query = mysqli_query($conn,"SELECT * FROM service_client WHERE client_name = '$client_name' " );
+  $num = mysqli_num_rows($num_query);
+      
+  $update = mysqli_query($conn, "UPDATE clients SET service_count = $num WHERE full_name = '$client_name'");
+  if($update){
+    header("location: show_transactions.php");
+    exit();
+  }else{
+    $_SESSION['message'] = "Something went wrong " .$conn-> error;
+    $_SESSION['msg_type'] = "danger";
+  }
+  
+}
 
 ?>
 
@@ -122,9 +119,17 @@ if(isset($_POST['save_service'])){
             <!-- general form elements -->
             <div class="card card-primary">
               <div class="card-header">
-                <h3 class="card-title">Create Transaction</h3>
+                <h3 class="card-title">New Transaction</h3>
               </div>
               <?php include('error.php'); ?>
+              <?php if (isset($_SESSION['message'])): ?>
+                  <div style="padding-top: 10px;" class="alert alert-<?php echo $_SESSION['msg_type']; ?>" role="alert">
+                    <?php 
+                      echo $_SESSION['message']; 
+                      unset($_SESSION['message']);
+                    ?>
+                  </div>
+                <?php endif ?>
               <!-- /.card-header -->
               <!-- form start -->
               <?php
@@ -136,10 +141,10 @@ if(isset($_POST['save_service'])){
                 endif;
 
               ?>
-              <form role="form" action="create_service.php" method="POST">
+              <form role="form" action="create_transaction.php" method="POST">
                 <div class="card-body">
                   <div class="form-group">
-                    <input type="hidden" name="id" value="<?php echo $row['service_id']?>">
+                    <input type="hidden" name="id" value="<?php echo $row['sc_id']?>">
                     <label >Service Name</label>
                     <select class="form-control" name="service_name" id="service_name">
                           <?php
@@ -172,7 +177,7 @@ if(isset($_POST['save_service'])){
                   
                   <div class="form-group">
                     <label >Client Name</label>
-                    <select class="form-control" name="client_name" id="client_name">
+                    <select class="form-control" name="client_name" id="name">
                           <?php
                           if(isset($_REQUEST['id'])){
                             $es = $row['client_name'];
@@ -184,14 +189,31 @@ if(isset($_POST['save_service'])){
                               }else{
                                 $selected = "";
                               }
-                              $output = '<option value="'.$r['full_name'].'" '.$selected.'>'.$r['full_name'].' </option>';
+                              //check count for service
+                              $count = $r['service_count'];
+                              if($count != 0 && $count % 5 == 0):
+                                $msg = " - This service is free";
+                              else:
+                                $msg = "";
+                              endif;
+
+                              $output = '<option value="'.$r['full_name'].'" '.$selected.'>'.$r['full_name'].' '.$msg.' </option>';
 
                               //Echo output
                               echo $output;                   
                             }
                           }else{
                              while ($r = mysqli_fetch_array($get_client)) { 
-                          $output = '<option value="'.$r['full_name'].'" '.$selected.'>'.$r['full_name'].' </option>';
+                              $count = $r['service_count'];
+                              if($count != 0 && $count % 5 == 0):
+                                $msg = " - This service is free";
+                              else:
+                                $msg = "";
+                              endif;
+                              
+                              
+                              
+                            $output = '<option value="'.$r['full_name'].'" '.$selected.'>'.$r['full_name'].'  '.$msg.' </option>';
 
                               //Echo output
                               echo $output;
@@ -231,11 +253,12 @@ if(isset($_POST['save_service'])){
                           ?>
                         </select>
                   </div>
-                  <div class="form-group">
-                    <label >Service Price</label>
-                    <input type="text" class="form-control" name="service_price" placeholder="Enter Service Price" value="<?php if(isset($_REQUEST['id'])): echo $row['service_cost']; else: echo ""; endif; ?>"></textarea>
-                    
-                  </div>
+                  <div class="icheck-primary">
+                    <input type="checkbox" id="remember" name="free_service" value="free">
+                    <label for="remember">
+                        Free Service
+                    </label>
+                </div>
                   
                   
                   </div>
@@ -245,10 +268,10 @@ if(isset($_POST['save_service'])){
 
                 <div class="card-footer">
                   <?php if(isset($_REQUEST['id'])){
-                  echo "<button type='submit' name='update_service' class='btn btn-primary'>Update</button>";
+                  echo "<button type='submit' name='update_transaction' class='btn btn-primary'>Update Transaction</button>";
                   echo "<a href='show_services.php' class='btn btn-danger' style='float: right'>Cancel</a>";
                   }else{
-                    echo "<button type='submit' name='save_service' class='btn btn-success'>Save</button>";
+                    echo "<button type='submit' name='save_transaction' class='btn btn-success'>Enter Transaction</button>";
                   }
                         
 
@@ -324,10 +347,20 @@ $(document).ready(function () {
 </script>
 <script type="text/javascript">
   $document.ready(function(){
-    $("#client_name").change(function(){
-      var cname
-    })
-  })
+    $("#name").change(function(){
+      var client_name = $(this).val();
+      //var dataString = "client_name"+cname;
+
+      $.ajax({
+        type: "POST",
+        url: "create_transaction.php",
+        data: {client_name:client_name},
+        success: function(result){
+          $("#show").html(result);
+        }
+      });
+    });
+  });
 </script>
 </body>
 </html>
