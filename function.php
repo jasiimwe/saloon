@@ -1,18 +1,26 @@
 <?php
 
 
-//check if number is multiple of 5
+//include 'config.php';
 
-public function isMultipleOf5($n)
+class saloon 
 {
-	while ($n > 5) {
-		$n = $n - 5;
+	
+	
 
-		if($n == 0):
-			return true;
+	function checkTokenExpiry($token){
+		$currentTime = date("Y-m-d H:i:s");
+
+		$query = mysqli_query($conn, "SELECT * FROM tokens WHERE token = '$token' " );
+		$result = mysqli_fetch_assoc($query);
+
+		if($result['token_expiry'] <= $currentTime):
+			$isOkay = false;
+		else:
+			$isOkay = true;
 		endif;
-	return false;
 
+		return $isOkay;
 	}
 }
 

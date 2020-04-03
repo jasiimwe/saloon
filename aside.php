@@ -158,6 +158,31 @@
             <a href="#" class="nav-link">
               <i class="nav-icon fas fa-copy"></i>
               <p>
+                Appointments
+                <i class="fas fa-angle-left right"></i>
+                <!-- <span class="badge badge-info right">6</span> -->
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="add_appointment.php" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Add Appointment</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="show_appointments.php" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Show Appointments</p>
+                </a>
+              </li>
+              
+            </ul>
+          </li>
+          <li class="nav-item has-treeview">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-copy"></i>
+              <p>
                 Clients
                 <i class="fas fa-angle-left right"></i>
                 <!-- <span class="badge badge-info right">6</span> -->
