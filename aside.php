@@ -146,7 +146,7 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a href="show_transaction.php" class="nav-link">
+                <a href="show_transactions.php" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
                   <p>Show Transactions</p>
                 </a>

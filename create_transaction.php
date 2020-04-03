@@ -44,6 +44,7 @@ if(isset($_POST['save_transaction'])){
       
       $_SESSION['message'] = "Transaction Successfully added";
       $_SESSION['msg_type'] = "success";
+      exit();
     }else{
       $_SESSION['message'] = "Something went wrong while adding transaction " .$conn-> error;
       $_SESSION['msg_type'] = "danger";

@@ -20,6 +20,7 @@ if(!isset($_SESSION['first_name'])){
 
 
 
+
 ?>
 
 <!DOCTYPE html>
@@ -103,12 +104,12 @@ if(!isset($_SESSION['first_name'])){
               <div class="inner">
                 <h3><?php echo $service_result ?><sup style="font-size: 20px"></sup></h3>
 
-                <p>Loyalty Due</p>
+                <p>Transactions</p>
               </div>
               <div class="icon">
                 <i class="ion ion-stats-bars"></i>
               </div>
-              <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+              <a href="show_transactions.php" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
             </div>
           </div>
           <!-- ./col -->
@@ -123,7 +124,7 @@ if(!isset($_SESSION['first_name'])){
               <div class="icon">
                 <i class="ion ion-person-add"></i>
               </div>
-              <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+              <a href="show_users.php" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
             </div>
           </div>
           <!-- ./col -->
